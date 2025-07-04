@@ -1,0 +1,14 @@
+{
+   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",              // 👈 generate ESM output
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "rootDir": "src",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}
