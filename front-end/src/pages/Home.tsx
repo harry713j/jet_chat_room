@@ -1,9 +1,8 @@
 import { useState, type ChangeEvent } from "react";
-
-// Need to install react router dom and socket.io-client
+import { useNavigate } from "react-router";
 
 export default function Home(){
-
+  const navigate = useNavigate()
   const [isVisible, setIsVisible] = useState(false);
   const [nickname, setNickname] = useState("")
 
@@ -11,7 +10,7 @@ export default function Home(){
     if (nickname) {
       // set the nickname to the local storage and navigate to the chat page
       localStorage.setItem("nickname", nickname);
-      
+      navigate("/chat-room")
     }
   }
 
@@ -19,11 +18,6 @@ export default function Home(){
   return (
     <div className="relative w-full h-screen px-28 py-12 flex justify-center items-center bg-linear-to-tr from-pink-200 to-red-50 ">
       <div className="w-full flex flex-col items-center space-y-8 ">
-        {/* <header className="flex w-full items-center ">
-          <Link href={`/`}>
-          <h2 className="text-2xl font-bold italic text-red-600 sel">Jet-Room</h2>
-          </Link>
-        </header> */}
       <section className="flex flex-col items-center space-y-4">
         <h1 className="text-6xl font-semibold text-red-600">Welcome to Jet Chat Room</h1>
         <p className="text-lg font-medium text-slate-700">Here you can talk with random people</p>
