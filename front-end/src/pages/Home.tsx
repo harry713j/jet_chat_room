@@ -4,13 +4,22 @@ import { useNavigate } from "react-router";
 export default function Home(){
   const navigate = useNavigate()
   const [isVisible, setIsVisible] = useState(false);
-  const [nickname, setNickname] = useState("")
+  const [nickname, setNickname] = useState(localStorage.getItem("nickname")!!)
 
   const onClickEnter = () => {
     if (nickname) {
       // set the nickname to the local storage and navigate to the chat page
       localStorage.setItem("nickname", nickname);
       navigate("/chat-room")
+    }
+  }
+
+  const onClickJoin = () => {
+    if(nickname){
+      localStorage.setItem("nickname", nickname);
+      navigate("/chat-room")
+    } else {
+      setIsVisible(true)
     }
   }
 
@@ -23,7 +32,7 @@ export default function Home(){
         <p className="text-lg font-medium text-slate-700">Here you can talk with random people</p>
       </section>
       <section>
-        <button onClick={() => setIsVisible(true)} className="bg-red-600 font-medium text-lg text-slate-50 px-8 py-3 rounded-md hover:bg-red-700 capitalize cursor-pointer shadow ">Join chat room</button>
+        <button onClick={onClickJoin} className="bg-red-600 font-medium text-lg text-slate-50 px-8 py-3 rounded-md hover:bg-red-700 capitalize cursor-pointer shadow ">Join chat room</button>
       </section>
       <footer className="flex w-full justify-center items-center text-center ">
         <div className="flex items-center justify-center w-3/5 not-only:">
