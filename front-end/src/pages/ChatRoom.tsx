@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { socket } from "../socket"
 import {Chat, Notification} from "../components"
 import { Link } from "react-router"
@@ -7,6 +7,12 @@ export default function ChatRoom(){
    const [isConnected, setIsConnected] = useState<boolean>(socket.connected)
    const [messageDetails, setMessageDetails] = useState<MessagePayload[]>([])
    const [inputMessage, setInputMessage] = useState<string>("")
+   const bottomRef = useRef<HTMLDivElement>(null)
+
+   // scroll to bottom on new message
+    useEffect(()=>{
+        bottomRef.current?.scrollIntoView({behavior: "smooth"})
+    },[messageDetails])
 
    useEffect(() => {
     // opens the socket
@@ -77,7 +83,7 @@ export default function ChatRoom(){
                 <div></div>
             </div>
             
-            <div className="flex-1 w-full flex flex-col space-y-1 lg:space-y-2 ">
+            <div className="flex-1 overflow-y-auto w-full flex flex-col space-y-1 lg:space-y-2 ">
              {
                 messageDetails.map((msg, index) => {
                     if (msg.type === "system") {
@@ -87,16 +93,17 @@ export default function ChatRoom(){
                         return <Chat key={index} nickname={msg.nickname} text={msg.text} time={msg.time} />
                 })
              }
+             <div ref={bottomRef}></div>
             </div>
-
-            <div className=" w-full lg:w-4/5 flex items-center justify-center space-x-3 lg:space-x-6">
+            
+            <div className=" w-[95%] lg:w-4/5 flex items-center justify-center space-x-3 lg:space-x-6">
                 <input 
                     type="text" 
                     placeholder="Type your message...."
                     value={inputMessage} 
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyDown={(e) => e.key == 'Enter' && sendMessage()} 
-                    className="w-full lg:w-4/5 h-[3rem] lg:h-[4rem] px-4 py-1.5 lg:px-6 lg:py-2 rounded-md  border border-slate-200 outline-none transition text-base lg:text-lg font-medium text-slate-700 shadow-xl placeholder:text-base lg:placeholder:text-lg placeholder:opacity-70 focus:border-red-400 "
+                    className="flex-1 h-[3rem] lg:h-[4rem] px-4 py-1.5 lg:px-6 lg:py-2 rounded-md  border border-slate-200 outline-none transition text-base lg:text-lg font-medium text-slate-700 shadow-xl placeholder:text-base lg:placeholder:text-lg placeholder:opacity-70 focus:border-red-400 "
                 />
                 <button 
                     onClick={sendMessage}
