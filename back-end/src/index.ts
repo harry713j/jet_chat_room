@@ -1,6 +1,6 @@
 import express from "express";
 import {createServer} from "http"
-import {Server} from "socket.io"
+import {Server, Socket} from "socket.io"
 import cors from 'cors'
 
 import { PORT, ALLOWED_CLIENT } from "./constants.js";
@@ -20,9 +20,9 @@ app.use(cors({
     origin: ALLOWED_CLIENT
 }))
 
-io.on("connection", (socket) => { // this socket is client socket
+io.on("connection", (socket: Socket) => { // this socket is client socket
     // show if someone is joined
-    socket.on("join", (nickname) => {
+    socket.on("join", (nickname: string) => {
         console.log(`${nickname} is joined`)
         socket.broadcast.emit("message-payload", {
             type: "system", text: `${nickname} has joined the chat`, time: new Date().toLocaleTimeString()
@@ -30,7 +30,7 @@ io.on("connection", (socket) => { // this socket is client socket
     })
 
     // retrieve the user message
-    socket.on("user-message", ({nickname, text }) => {
+    socket.on("user-message", ({nickname, text }: {nickname: string, text: string}) => {
         const payload = {
             type: "chat", nickname, text, time: new Date().toLocaleTimeString()
         }
