@@ -9,7 +9,7 @@ interface ChatGroupSchema extends Document {
     members: UserSchema[]
 }
 
-interface UserSchema extends Document {
+interface UserSchema {
     fullName: string
     username: string
     email: string
@@ -17,3 +17,11 @@ interface UserSchema extends Document {
     groups: Array<ChatGroupSchema>
     refreshToken?: string
 }
+
+interface UserMethods {
+    // functions
+    generateRefreshToken: () => string
+    generateAccessToken: () => string
+}
+
+type UserDocument = Document & UserSchema & UserMethods

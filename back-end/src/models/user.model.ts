@@ -1,8 +1,8 @@
 import {Schema, model} from "mongoose";
 import jwt, { SignOptions } from "jsonwebtoken"
-import { UserSchema } from "../types/schema";
+import { UserDocument } from "../types/schema";
 
-export const userSchema = new Schema<UserSchema>({
+export const userSchema = new Schema<UserDocument>({
     fullName : {
         type: String,
         maxlength: 30,
@@ -28,8 +28,6 @@ export const userSchema = new Schema<UserSchema>({
     },
     password: {
         type:String,
-        maxlength: 20,
-        minlength: 6,
         trim: true,
         required: [true, "Password is required"],
     },
@@ -77,4 +75,4 @@ userSchema.methods.generateRefreshToken = function (){
     return jwt.sign({_id: this._id,}, secret, options)
 }
 
-export const User = model<UserSchema>("User", userSchema)
+export const User = model<UserDocument>("User", userSchema)

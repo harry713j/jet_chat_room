@@ -23,7 +23,7 @@ const io = new Server(httpServer, {
 
 app.use(cors({
     origin: ALLOWED_CLIENT,
-    credentials: true
+    credentials: true // allow cookies
 }))
 
 app.use(express.json({}))
@@ -31,10 +31,13 @@ app.use(cookieParser())
 
 // for testing purpose
 app.use((req: Request, _: Response, next: NextFunction) => {
-    console.log("Reqested Url: ", req.originalUrl, ": time : ", new Date())
+    console.log("Reqested Url: ", req.originalUrl, ": time : ", new Date().toLocaleDateString() + ":" + new Date().toLocaleTimeString())
     next()
 })
 
+
+import userRouter from "./routes/user.route.js";
+app.use("/api/v1/users", userRouter)
 
 export{
     httpServer, io

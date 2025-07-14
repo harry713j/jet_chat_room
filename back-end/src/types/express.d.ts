@@ -1,8 +1,8 @@
-import { UserSchema } from "./schema";
+import { UserDocument } from "./schema";
 import "express"
 
 declare module "express"{
     interface Request{
-        user?: UserSchema | null
+        user?: UserDocument | null
     }
-}
+} 
