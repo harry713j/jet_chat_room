@@ -2,7 +2,7 @@ import {Schema, model} from "mongoose";
 import jwt, { SignOptions } from "jsonwebtoken"
 import { UserDocument } from "../types/schema";
 
-export const userSchema = new Schema<UserDocument>({
+const userSchema = new Schema<UserDocument>({
     fullName : {
         type: String,
         maxlength: 30,
@@ -30,6 +30,13 @@ export const userSchema = new Schema<UserDocument>({
         type:String,
         trim: true,
         required: [true, "Password is required"],
+    },
+    onlineStatus:{
+        type: Boolean,
+        default: false
+    },
+    socketId:{
+        type: String
     },
     groups: [
         {

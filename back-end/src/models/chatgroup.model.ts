@@ -1,25 +1,34 @@
 import { Schema, model } from "mongoose";
-import { userSchema } from "./user.model.js";
 import { ChatGroupSchema } from "../types/schema.js";
 
 const chatgroupSchema = new Schema<ChatGroupSchema>({
+    isGroup:{
+        type: Boolean,
+        default: true
+    },
     groupName: {
         type: String,
-        required: [true, "Group name is required"],
         maxlength: 25,
         minlength: 3,
         trim: true,
-        index: true
+        required: function(){
+            return this.isGroup === true
+        }
     },
     groupId: {
         type: String,
-        required:[true, "Group Id is required"]
+        required:[true, "Group Id is required"],
+        index: true,
+        unique: true
     },
     admin: {
         type: Schema.Types.ObjectId,
         ref: "User"
     },
-    members: [userSchema]
+    members: [{
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    }]
 }, {timestamps: true})
 
 

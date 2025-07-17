@@ -3,6 +3,8 @@ import { User } from "../models/user.model.js";
 import { serverLogger } from "../utils/logger.js";
 import bcrypt from "bcrypt"
 import { Types } from "mongoose";
+import jwt from "jsonwebtoken"
+import { SignupRequest, LoginRequest } from "../types/controller.js";
 
 
 
@@ -107,11 +109,16 @@ export async function loginUser(req: Request, res: Response) {
         secure: true
      }
 
-          res.status(200)
+      const loggedInUser = await User.findById(existedUser?._id).select("-password -refreshToken")
+
+        res.status(200)
             .cookie("accessToken", accessToken, options)
             .cookie("refreshToken", refreshToken, options)
             .json({
-                message: "Successfully login the user"
+                message: "Successfully login the user",
+                user: loggedInUser,
+                refreshToken,
+                accessToken
             })
 
     } catch (error) {
@@ -132,7 +139,7 @@ export async function logoutUser(req: Request, res: Response) {
 
         const options = {
             httpOnly: true,
-        secure: true
+            secure: true
         }
 
         res.status(200)
@@ -172,3 +179,176 @@ async function generateTokens(res: Response, userId: Types.ObjectId): Promise<st
     }
 }
 
+export async function refreshAccessToken(req:Request, res: Response) {
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+
+    if (!incomingRefreshToken) {
+        res.status(401).json({
+            message: "Unauthorized request"
+        })
+    }
+
+    try {
+        const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET!) as jwt.JwtPayload
+
+        const user = await User.findById(decodedToken?._id)
+
+        if (!user) {
+            res.status(400).json({
+                message: "Invalid refresh token"
+            })
+        }
+
+        if(incomingRefreshToken !== user?.refreshToken){
+            res.status(400).json({
+                message: "Refresh token is expired or used"
+            })
+        }
+
+        const tokens = await generateTokens(res, user?._id as Types.ObjectId)
+
+        if (typeof tokens === "string") {
+            res.status(500).json({
+                message: tokens
+            })
+            return
+        }
+
+        const {accessToken, refreshToken} = tokens
+
+        // assign the tokens
+     const options = {
+        httpOnly: true,
+        secure: true
+     }
+
+
+     res.status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json({
+                message: "Successfully refresh the tokens",
+                refreshToken, 
+                accessToken
+            })
+    } catch (error) {
+        serverLogger(error as Error)
+         res.status(500).json({
+            message: "Something went wrong while refreshing access token"
+        })
+    }
+
+}
+
+export async function changeCurrentPassword(req:Request, res: Response) {
+    try {
+        const {oldpassword, newpassword} : {oldpassword:string, newpassword:string} = req.body
+
+        const user = await User.findById(req.user?._id)
+        const isPasswordValid = await bcrypt.compare(oldpassword, user?.password!)
+
+        if (!isPasswordValid) {
+            res.status(401).json({
+                message: "Password incorrect"
+            })
+        }
+
+        const hashedPassword = await bcrypt.hash(newpassword, 10)
+        
+        await User.findByIdAndUpdate(user?._id, {
+            $set: {
+                password: hashedPassword
+            }
+        })
+
+        res.status(201).json({
+            message: "Password changed successfully"
+        })
+
+    } catch (err) {
+        const error = err as Error
+        serverLogger(error)
+         res.status(500).json({
+            message: "Something went wrong while changing the password" + error.message
+        })
+    }
+}
+
+export async function updateUserFullName(req:Request, res: Response) {
+    try {
+        const {fullName}: {fullName: string} = req.body
+
+        if (!fullName) {
+            res.status(401).json({
+                message: "Full name is required"
+            })
+        }
+
+        const user = await User.findByIdAndUpdate(req.user?._id, {
+            $set: {
+                fullName: fullName
+            }
+        }).select("-password -refreshToken")
+
+        res.status(201).json({
+            message: "Full name updated successfully",
+            user: user
+        })
+
+    } catch (error) {
+        const err = error as Error
+        serverLogger(err)
+         res.status(500).json({
+            message: "Something went wrong while updating the user full name " + err.message
+        })
+    }
+}
+
+export async function updateUserEmail(req:Request, res: Response) {
+    try {
+        const {email}: {email: string} = req.body
+
+        if (!email) {
+            res.status(401).json({
+                message: "Email is required"
+            })
+        }
+
+        const user = await User.findByIdAndUpdate(req.user?._id, {
+            $set: {
+                email: email
+            }
+        }).select("-password -refreshToken")
+
+        res.status(201).json({
+            message: "Email updated successfully",
+            user: user
+        })
+
+    } catch (error) {
+        const err = error as Error
+        serverLogger(err)
+         res.status(500).json({
+            message: "Something went wrong while updating the user email " + err.message
+        })
+    }
+}
+
+export async function getCurrentUser(req:Request, res: Response) {
+    try {
+        const user = await User.findById(req.user?._id)
+        .select("-password -refrehToken")
+        .populate("groups")
+
+        res.status(200).json({
+            message: "Fetched user successfully",
+            user
+        })
+    } catch (error) {
+         const err = error as Error
+        serverLogger(err)
+         res.status(500).json({
+            message: "Something went wrong while fetching the user " + err.message
+        })
+    }
+}
