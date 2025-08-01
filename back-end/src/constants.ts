@@ -1,12 +1,9 @@
-import dotenv from "dotenv"
+import dotenv from "dotenv";
 
-dotenv.config()
+dotenv.config();
 
-const PORT = process.env.PORT
-const ALLOWED_CLIENT = process.env.ALLOWED_ORIGIN
-const DB_NAME = "jet-room"
+const PORT = process.env.PORT;
+const ALLOWED_CLIENT = process.env.ALLOWED_ORIGIN;
+const DB_NAME = "jet-room";
 
-
-export {
-    PORT, ALLOWED_CLIENT, DB_NAME
-}
+export { PORT, ALLOWED_CLIENT, DB_NAME };

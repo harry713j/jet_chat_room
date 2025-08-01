@@ -1,9 +1,7 @@
 import Home from "./Home";
 import NotFound from "./NotFound";
-import ChatRoom from "./ChatRoom";
+import ChatPage from "./ChatPage";
+import Signup from "./Signup";
+import Login from "./Login";
 
-
-
-export {
-    Home, NotFound, ChatRoom
-}
+export { Home, NotFound, ChatPage, Signup, Login };

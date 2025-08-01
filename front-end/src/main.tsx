@@ -1,9 +1,11 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './global.css'
-import {createBrowserRouter, RouterProvider} from "react-router"
-import {Home, NotFound, ChatRoom} from "./pages"
-import {Protection} from "./components"
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "@/global.css";
+import { Toaster } from "@/components/ui/sonner";
+import { createBrowserRouter, RouterProvider } from "react-router";
+import { Home, NotFound, ChatPage, Signup, Login } from "@/pages";
+import { Protection } from "./components";
+import { UserProvider } from "@/context/UserContext";
 
 const router = createBrowserRouter([
   {
@@ -12,15 +14,31 @@ const router = createBrowserRouter([
     errorElement: <NotFound />,
   },
   {
-    path:"/chat-room",
-    element: <Protection><ChatRoom /></Protection>,
-    errorElement: <NotFound />
-  }
-])
+    path: "/chat",
+    element: (
+      <Protection>
+        <ChatPage />
+      </Protection>
+    ),
+    errorElement: <NotFound />,
+  },
+  {
+    path: "/signup",
+    element: <Signup />,
+    errorElement: <NotFound />,
+  },
+  {
+    path: "/login",
+    element: <Login />,
+    errorElement: <NotFound />,
+  },
+]);
 
-
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
-)
+    <UserProvider>
+      <RouterProvider router={router} />
+      <Toaster richColors />
+    </UserProvider>
+  </StrictMode>
+);

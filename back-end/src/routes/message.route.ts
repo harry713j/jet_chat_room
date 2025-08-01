@@ -1,9 +1,9 @@
 import express from "express";
-import {getMessages} from "../controller/message.controller.js"
-import {verifyToken} from "../middleware/auth.middleware.js"
+import { getMessages } from "../controller/message.controller.js";
+import { verifyToken } from "../middleware/auth.middleware.js";
 
-const router = express.Router()
+const router = express.Router();
 
-router.route("/:groupId").get(verifyToken, getMessages)
+router.route("/:groupId").get(verifyToken, getMessages);
 
-export default router
+export default router;
