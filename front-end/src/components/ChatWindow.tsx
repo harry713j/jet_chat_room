@@ -2,10 +2,11 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Group, Message } from "@/types/types";
 import { useUser } from "@/context/UserContext";
 import { Loader } from "lucide-react";
+import { socket } from "@/socket";
 
 type Props = {
   messages: Message[];
@@ -13,24 +14,58 @@ type Props = {
   isLoading: boolean;
 };
 
-// handling the messages from client sockets, also making the user online status
-// when user visit the /chat location then the user status change to connected and online,
-// for every group/room listen to the online_user event
-// for every group listen to the new_message event
-
 export function ChatWindow({ messages, room, isLoading }: Props) {
   const { user } = useUser();
-  const [text, setText] = useState("");
+  const [content, setContent] = useState("");
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // const handleSend = () => {
-  //   if (text.trim()) {
-  //     onSend(text);
-  //     setText("");
-  //   }
-  // };
+  useEffect(() => {
+    if (!content) {
+      socket.emit("stop_typing", { chatgroupId: room.groupId });
+    } else {
+      socket.emit("typing", { chatgroupId: room.groupId });
+    }
+  }, [content, room.groupId]);
+
+  useEffect(() => {
+    const handleTyping = ({ userId }: any) => {
+      if (userId !== user.userId && !typingUsers.includes(userId)) {
+        setTypingUsers((prev) => [...prev, userId]);
+      }
+    };
+
+    const handleStopTyping = ({ userId }: any) => {
+      setTypingUsers((prev) => prev.filter((id) => id !== userId));
+    };
+
+    socket.on("user_typing", handleTyping);
+    socket.on("user_stop_typing", handleStopTyping);
+
+    return () => {
+      socket.off("user_typing", handleTyping);
+      socket.off("user_stop_typing", handleStopTyping);
+    };
+  }, [typingUsers, user?.userId]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSend = () => {
+    if (content.trim()) {
+      socket.emit("send_message", {
+        chatgroupId: room.groupId,
+        content,
+      });
+      setContent("");
+    }
+  };
 
   if (!room)
-    return <div className="p-4">Select a chat to start messaging.</div>;
+    return <div className="p-4">Select a chat room to start messaging.</div>;
 
   if (isLoading) {
     return (
@@ -42,21 +77,21 @@ export function ChatWindow({ messages, room, isLoading }: Props) {
 
   return (
     <Card className="flex flex-col h-full">
-      <CardHeader className="font-bold text-lg">
+      <CardHeader className="font-bold content-lg">
         {room.isGroup
           ? room.groupName
           : room.members.find((m: any) => m.username !== user.username)
               .fullName}
       </CardHeader>
       <CardContent className="flex-1 p-0">
-        <ScrollArea className="h-[400px] p-4">
+        <ScrollArea className="h-[400px] p-4" ref={scrollRef}>
           <div className="space-y-3">
             {messages.map((msg, idx) => (
               <div
                 key={idx}
                 className="bg-muted px-3 py-2 rounded-md w-fit max-w-[80%]"
               >
-                <p className="text-sm">{msg.sender.username}</p>
+                <p className="content-sm">{msg.sender.username}</p>
                 <p>{msg.content}</p>
               </div>
             ))}
@@ -66,13 +101,13 @@ export function ChatWindow({ messages, room, isLoading }: Props) {
       <div className="flex p-4 gap-2 border-t">
         <Input
           placeholder="Type a message..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          // onKeyDown={(e) => {
-          //   if (e.key === "Enter") handleSend();
-          // }}
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSend();
+          }}
         />
-        {/* <Button onClick={handleSend}>Send</Button> */}
+        <Button onClick={handleSend}>Send</Button>
       </div>
     </Card>
   );

@@ -22,6 +22,7 @@ io.on("connection", (socket: Socket) => {
   // when user send new message fetch it and store it in db and send it to the correct chat group
   socket.on("send_message", async (payload) => {
     try {
+      // handle the message payload
       const { chatgroupId, content } = payload;
 
       const newMessage = await Message.create({
