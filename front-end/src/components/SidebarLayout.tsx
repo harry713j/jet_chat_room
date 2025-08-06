@@ -2,7 +2,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { UserSidebar, ChatWindow } from "@/components";
 import { useEffect, useState } from "react";
 import type { ActiveChat, Group, Message } from "@/types/types";
-import { socket } from "@/socket";
+import { useSocket } from "@/context/SocketContext";
 import axios from "axios";
 import { toast } from "sonner";
 
@@ -11,6 +11,7 @@ export function SidebarLayout() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [activeRooms, setActiveRooms] = useState<ActiveChat[]>([]);
+  const { socket } = useSocket();
 
   useEffect(() => {
     axios
@@ -20,6 +21,8 @@ export function SidebarLayout() {
   }, []);
 
   useEffect(() => {
+    if (!socket) return;
+
     socket.connect();
 
     // join users all groups
@@ -35,6 +38,8 @@ export function SidebarLayout() {
   }, []);
 
   useEffect(() => {
+    if (!socket) return;
+
     // recieve new message new message
     const onNewMessage = (message: Message) => {
       if (message.chatgroupId === currentRoom?.groupId) {

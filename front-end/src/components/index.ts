@@ -7,7 +7,7 @@ import { SidebarLayout } from "./SidebarLayout";
 import { Searchbar } from "./Searchbar";
 
 export {
-  ProtectedRoute as Protection,
+  ProtectedRoute as AuthLayer,
   ChatWindow,
   ActiveGroups,
   UserSidebar,

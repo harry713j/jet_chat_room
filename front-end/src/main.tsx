@@ -4,8 +4,9 @@ import "@/global.css";
 import { Toaster } from "@/components/ui/sonner";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import { Home, NotFound, ChatPage, Signup, Login } from "@/pages";
-import { Protection } from "./components";
+import { AuthLayer } from "./components";
 import { UserProvider } from "@/context/UserContext";
+import { SocketProvider } from "@/context/SocketContext";
 
 const router = createBrowserRouter([
   {
@@ -16,9 +17,9 @@ const router = createBrowserRouter([
   {
     path: "/chat",
     element: (
-      <Protection>
+      <AuthLayer>
         <ChatPage />
-      </Protection>
+      </AuthLayer>
     ),
     errorElement: <NotFound />,
   },
@@ -37,8 +38,10 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <UserProvider>
-      <RouterProvider router={router} />
-      <Toaster richColors />
+      <SocketProvider>
+        <RouterProvider router={router} />
+        <Toaster richColors />
+      </SocketProvider>
     </UserProvider>
   </StrictMode>
 );

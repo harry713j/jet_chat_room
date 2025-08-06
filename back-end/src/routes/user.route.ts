@@ -13,6 +13,7 @@ import {
   getRooms,
   getActiveChats,
   getAccessToken,
+  checkAuthentication,
 } from "../controller/user.controller.js";
 
 const router = express.Router();
@@ -29,5 +30,6 @@ router.route("").get(verifyToken, getUsers);
 router.route("/search").get(verifyToken, getRooms);
 router.route("/active-chats").get(verifyToken, getActiveChats);
 router.route("/get-access-token").get(verifyToken, getAccessToken);
+router.route("/check").get(verifyToken, checkAuthentication);
 
 export default router;

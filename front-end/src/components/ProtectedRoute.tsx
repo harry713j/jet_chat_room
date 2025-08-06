@@ -1,20 +1,25 @@
-import { useEffect, type ReactNode } from "react"
-import { useNavigate } from "react-router"
+import { useAuth } from "@/hooks/auth";
+import { type ReactNode } from "react";
+import { useNavigate } from "react-router";
+import { Loader } from "lucide-react";
 
-export function ProtectedRoute({children }: {children : ReactNode}){
-    const nickname = localStorage.getItem("nickname")
-    const navigate = useNavigate()
+export function ProtectedRoute({ children }: { children: ReactNode }) {
+  const navigate = useNavigate();
+  const { isLoading, isAuthenticated } = useAuth();
 
-    useEffect(() => {
-    if (!nickname) {
-      navigate("/");
-    }
-  }, [nickname, navigate]);
+  console.log("Inside protected route");
 
-  // While redirecting, don't render children
-  if (!nickname) {
-    return null;
+  if (isLoading) {
+    return (
+      <div>
+        <Loader className="w-10 h-10 animate-spin" />
+      </div>
+    );
   }
 
-    return <>{children}</>
+  if (!isAuthenticated) {
+    navigate("/login");
+  }
+
+  return <>{children}</>;
 }

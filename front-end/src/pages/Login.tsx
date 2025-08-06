@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Loader } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import axios, { AxiosError } from "axios";
 import { loginSchema } from "@/schema/loginSchema";
 import { z } from "zod";
@@ -123,11 +123,11 @@ export default function Login() {
               />
               <Button
                 type="submit"
-                className="w-1/5 h-10 text-[1.07rem] font-medium px-4 py-1.5"
+                className="w-1/5 h-10 cursor-pointer text-[1.07rem] font-medium px-4 py-1.5"
               >
                 {isSubmitting ? (
                   <span>
-                    <Loader className="w-5 h-5 animate-spin" />
+                    <Loader2 className="w-5 h-5 animate-spin" />
                   </span>
                 ) : (
                   "Login"

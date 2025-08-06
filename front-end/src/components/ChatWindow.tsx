@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Group, Message } from "@/types/types";
 import { useUser } from "@/context/UserContext";
 import { Loader } from "lucide-react";
-import { socket } from "@/socket";
+import { useSocket } from "@/context/SocketContext";
 
 type Props = {
   messages: Message[];
@@ -19,8 +19,11 @@ export function ChatWindow({ messages, room, isLoading }: Props) {
   const [content, setContent] = useState("");
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { socket } = useSocket();
 
   useEffect(() => {
+    if (!socket) return;
+
     if (!content) {
       socket.emit("stop_typing", { chatgroupId: room.groupId });
     } else {
@@ -29,6 +32,8 @@ export function ChatWindow({ messages, room, isLoading }: Props) {
   }, [content, room.groupId]);
 
   useEffect(() => {
+    if (!socket) return;
+
     const handleTyping = ({ userId }: any) => {
       if (userId !== user.userId && !typingUsers.includes(userId)) {
         setTypingUsers((prev) => [...prev, userId]);
@@ -55,6 +60,8 @@ export function ChatWindow({ messages, room, isLoading }: Props) {
   }, [messages]);
 
   const handleSend = () => {
+    if (!socket) return;
+
     if (content.trim()) {
       socket.emit("send_message", {
         chatgroupId: room.groupId,

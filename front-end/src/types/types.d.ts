@@ -3,6 +3,7 @@ import {
   messageSchema,
   userSchema,
 } from "@/schema/chatgroupSchema";
+import type { Socket } from "socket.io-client";
 import { z } from "zod";
 
 type Group = z.infer<typeof groupSchema>;
@@ -12,6 +13,10 @@ type Message = z.infer<typeof messageSchema>;
 type UserContextType = {
   user?: User;
   isLoading: boolean;
+};
+
+type SocketContextType = {
+  socket: Socket | null;
 };
 
 type UserOption = {
