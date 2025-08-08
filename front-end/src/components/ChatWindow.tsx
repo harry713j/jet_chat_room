@@ -25,11 +25,11 @@ export function ChatWindow({ messages, room, isLoading }: Props) {
     if (!socket) return;
 
     if (!content) {
-      socket.emit("stop_typing", { chatgroupId: room.groupId });
+      socket.emit("stop_typing", { chatgroupId: room?.groupId });
     } else {
-      socket.emit("typing", { chatgroupId: room.groupId });
+      socket.emit("typing", { chatgroupId: room?.groupId });
     }
-  }, [content, room.groupId]);
+  }, [content, room?.groupId]);
 
   useEffect(() => {
     if (!socket) return;
@@ -64,7 +64,7 @@ export function ChatWindow({ messages, room, isLoading }: Props) {
 
     if (content.trim()) {
       socket.emit("send_message", {
-        chatgroupId: room.groupId,
+        chatgroupId: room?.groupId,
         content,
       });
       setContent("");
@@ -85,7 +85,7 @@ export function ChatWindow({ messages, room, isLoading }: Props) {
   return (
     <Card className="flex flex-col h-full">
       <CardHeader className="font-bold content-lg">
-        {room.isGroup
+        {room?.isGroup
           ? room.groupName
           : room.members.find((m: any) => m.username !== user.username)
               .fullName}
@@ -93,7 +93,7 @@ export function ChatWindow({ messages, room, isLoading }: Props) {
       <CardContent className="flex-1 p-0">
         <ScrollArea className="h-[400px] p-4" ref={scrollRef}>
           <div className="space-y-3">
-            {messages.map((msg, idx) => (
+            {messages?.map((msg, idx) => (
               <div
                 key={idx}
                 className="bg-muted px-3 py-2 rounded-md w-fit max-w-[80%]"

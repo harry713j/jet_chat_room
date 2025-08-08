@@ -10,40 +10,97 @@ export async function verifyToken(
   next: NextFunction
 ) {
   try {
-    const token =
-      req.cookies?.refreshToken ||
-      req.header("Authorization")?.replace("Bearer ", "");
+    const token = req.cookies.accessToken;
 
     if (!token) {
       res.status(401).json({
         message: "Unauthorized access",
         statusCode: 401,
       });
+      return;
     }
 
-    const decodedToken = jwt.verify(
-      token,
-      process.env.ACCESS_TOKEN_SECRET!
-    ) as jwt.JwtPayload;
+    try {
+      const decodedToken = jwt.verify(
+        token!,
+        process.env.ACCESS_TOKEN_SECRET!
+      ) as jwt.JwtPayload;
 
-    if (typeof decodedToken === "string") {
+      if (typeof decodedToken === "string") {
+        res.status(401).json({
+          message: "Invalid token format",
+          statusCode: 401,
+        });
+        return;
+      }
+
+      const user = await User.findById(decodedToken?._id).select(
+        "-password -refreshToken"
+      );
+
+      if (!user) {
+        res.json({
+          message: "Invalid access token",
+          statusCode: 401,
+        });
+        return;
+      }
+
+      req.user = user;
+      next();
+      return;
+    } catch (err) {
+      if ((err as Error).name !== "TokenExpiredError") {
+        res.status(401).json({
+          message: "Invalid access token",
+          statusCode: 401,
+        });
+        return;
+      }
+    }
+
+    // if access token is expired then, renew it using refresh token
+    const refreshToken = req.cookies?.refrehToken;
+
+    if (!refreshToken) {
       res.status(401).json({
-        message: "Invalid token format",
+        message: "Unauthorized - refresh token missing",
         statusCode: 401,
       });
+      return;
     }
 
-    const user = await User.findById(decodedToken?._id).select(
-      "-password -refreshToken"
-    );
-
-    if (!user) {
-      res.json({
-        message: "Invalid access token",
-        statusCode: 401,
+    let refreshDecoded;
+    try {
+      refreshDecoded = jwt.verify(
+        refreshToken,
+        process.env.REFRESH_TOKEN_SECRET!
+      ) as jwt.JwtPayload;
+    } catch {
+      res.status(403).json({
+        message: "Invalid refresh token",
+        statusCode: 403,
       });
+      return;
     }
 
+    const user = await User.findById(refreshDecoded?._id);
+    if (!user || user.refreshToken !== refreshToken) {
+      res.status(403).json({
+        message: "Refresh token not recognized",
+        statusCode: 403,
+      });
+      return;
+    }
+
+    const newAccessToken = user.generateAccessToken();
+
+    const options = {
+      httpOnly: true,
+      secure: true,
+    };
+
+    res.cookie("accessToken", newAccessToken, options);
     req.user = user;
     next();
   } catch (err) {
@@ -53,6 +110,7 @@ export async function verifyToken(
       message: "Something went wrong " + error.message,
       statusCode: 500,
     });
+    return;
   }
 }
 

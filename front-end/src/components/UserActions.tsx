@@ -169,7 +169,7 @@ export function UserActions() {
         </div>
         <div>
           <DropdownMenu>
-            <DropdownMenuTrigger>
+            <DropdownMenuTrigger asChild>
               <Button size={"icon"}>
                 <Menu />
               </Button>

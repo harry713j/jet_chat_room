@@ -7,8 +7,6 @@ export function ProtectedRoute({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const { isLoading, isAuthenticated } = useAuth();
 
-  console.log("Inside protected route");
-
   if (isLoading) {
     return (
       <div>

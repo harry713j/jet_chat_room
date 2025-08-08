@@ -6,7 +6,7 @@ export function ProfilePicture({ name }: { name: string }) {
     <div
       className={`bg-${randColors[randIndex]}-700 rounded-full w-[7rem] h-[7rem] `}
     >
-      <p className="text-slate-200 text-4xl">{name.charAt(0).toUpperCase()}</p>
+      <p className="text-slate-200 text-4xl">{name?.charAt(0).toUpperCase()}</p>
     </div>
   );
 }
